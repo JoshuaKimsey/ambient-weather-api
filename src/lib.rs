@@ -1,6 +1,6 @@
 //! # Ambient Weather API
 //! 
-//! `ambient_weather_api` is a collection of functions for downloading current and historical data from the Ambient Weather API. It features built in support for choosing which devise you want to pull data from, and has safety measures built in to avoid hitting Ambient Weather's rate limits. 
+//! `ambient_weather_api` is a collection of functions for downloading current and historical data from the Ambient Weather API. It features built in support for choosing which device you want to pull data from, and has safety measures built in to avoid hitting Ambient Weather's rate limits. 
 //! 
 //! To learn more about how the Ambient Weather API works, and to obtain the required API and Application keys to use this creat, check out the [Ambient Weather API Documentation](https://ambientweather.docs.apiary.io).
 //! 
