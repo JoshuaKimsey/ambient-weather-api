@@ -5,6 +5,11 @@ authors = ["Joshua Kimsey"]
 edition = "2021"
 description = "A library for accessing the Ambient Weather API"
 license = "MIT"
+license-file = "LICENSE"
+readme = "README.md"
+homepage = "https://github.com/JoshuaKimsey/ambient-weather-api"
+categories = ["api-bindings", ]
+package = ["api", "weather"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
