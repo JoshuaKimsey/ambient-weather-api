@@ -10,6 +10,8 @@ In order to use this API, you will need to look over the [list of device paramet
 
 Currently, this Rust crate is only capable of utilizing the Ambient Weather REST API. Support for their Realtime Socket.IO API will come at a later date.
 
+To view more about this crate and to access the official documentation, please visit the [crates.io](https://crates.io/crates/ambient-weather-api) page.
+
 # Getting Started
 
 To get started with pulling in the latest weather data from your Ambient Weather device, simply follow the example below:
