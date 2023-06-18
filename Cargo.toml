@@ -9,6 +9,10 @@ readme = "README.md"
 homepage = "https://github.com/JoshuaKimsey/ambient-weather-api"
 categories = ["api-bindings", ]
 package = ["api", "weather"]
+exclude = [
+    "main.rs"
+]
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
