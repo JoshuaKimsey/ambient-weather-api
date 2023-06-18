@@ -1,6 +1,6 @@
 //! # Ambient Weather API
 //! 
-//! `ambient_weather_api` is a collection of functions for downloading current and historical data from the Ambient Weather API. It features built in support for choosing which device you want to pull data from, and has safety measures built in to avoid hitting Ambient Weather's rate limits. 
+//! `ambient_weather_api` is a collection of functions for downloading current and historical data from the Ambient Weather API. It features built in support for choosing which device you want to pull data from, and has (some) safety measures built in to avoid hitting Ambient Weather's rate limits. 
 //! 
 //! To learn more about how the Ambient Weather API works, and to obtain the required API and Application keys to use this creat, check out the [Ambient Weather API Documentation](https://ambientweather.docs.apiary.io).
 //! 
@@ -23,16 +23,23 @@
 //!         device_id: 0,
 //!         use_new_api_endpoint: false,
 //!     };
-//!
-//!     let latest_data = get_latest_aw_device_data(api_credentials);
-//!
-//!     println!("{}", latest_data["tempf"]);
+//!     
+//!     // Get the current temperature
+//!     let latest_data = get_latest_aw_device_data(&api_credentials);
+//!     println!("The current temp is: {}F", latest_data.tempf.unwrap());
+//! 
+//!     // Get the historic temperatures and loop through them going back in time
+//!     let historic_data = get_historic_aw_device_data(&api_credentials);
+//!     for i in 0..historic_data.len() {
+//!         println!("The historic temp was: {}F", historic_data[i].tempf.unwrap());
+//!     }
 //! }
 //! ```
 
-use reqwest;
 use serde_json::{self, Value, json};
 use std::{thread, time::Duration};
+
+mod weather_data_struct;
 
 #[derive(Clone)]
 
@@ -49,40 +56,38 @@ pub struct AmbientWeatherAPICredentials {
 }
 
 /// A private function for crafting the appropriate Ambient Weather API URL.
-fn get_aw_api_url(api_credentials: AmbientWeatherAPICredentials, device_mac_address: &str) -> String {
+fn get_aw_api_url(api_credentials: &AmbientWeatherAPICredentials, device_mac_address: &str) -> String {
 
-    let url_endpoint;
-
-    if api_credentials.use_new_api_endpoint {
-        url_endpoint = "rt";
+    let url_endpoint = if api_credentials.use_new_api_endpoint {
+        "rt"
     } else {
-        url_endpoint = "api";
-    }
+        "api"
+    };
 
-    let ambient_weather_url = format!("https://{}.ambientweather.net/v1/devices/{}?applicationKey={}&apiKey={}", url_endpoint, device_mac_address, api_credentials.app_key, api_credentials.api_key);
+    let ambient_weather_url = format!("https://{url_endpoint}.ambientweather.net/v1/devices/{device_mac_address}?applicationKey={}&apiKey={}", api_credentials.app_key, api_credentials.api_key);
 
-    return ambient_weather_url;
+    ambient_weather_url
 }
 
 /// Advanced: Gets the latest raw device data from the Ambient Weather REST API. 
 /// 
 /// Unless you have a specific need to access the raw device data, I would not recommend using this, due to the messy nature of the output.
-pub fn get_raw_latest_aw_device_data(api_credentials: AmbientWeatherAPICredentials, device_mac_address: String) -> Result<Value, reqwest::Error> {
-
+#[tokio::main]
+async fn get_raw_latest_aw_device_data(api_credentials: &AmbientWeatherAPICredentials, device_mac_address: String) -> Result<Value, reqwest::Error> {
     let device_id = api_credentials.device_id;
 
-    let response: Value = reqwest::blocking::get(get_aw_api_url(api_credentials, &device_mac_address))?
-        .json()?;
+    let response: Value = reqwest::get(get_aw_api_url(api_credentials, &device_mac_address)).await?
+        .json().await?;
 
     thread::sleep(Duration::from_millis(1000));
- 
-    return Ok(json!(response[device_id]))
+
+    Ok(json!(response[device_id]))
 }
 
 /// Advanced: Gets the historical raw data from the Ambient Weather REST API.
 /// 
 /// Unless you have a specific need to access the raw device data, I would not recommend using this, due to the messy nature of the output.
-pub fn get_raw_historic_aw_device_data(api_credentials: AmbientWeatherAPICredentials) -> Result<Value, reqwest::Error> {
+fn get_raw_historic_aw_device_data(api_credentials: &AmbientWeatherAPICredentials) -> Result<Value, reqwest::Error> {
 
     let mut device_mac_address = json!(get_raw_latest_aw_device_data(Clone::clone(&api_credentials), "".to_string()).unwrap()["macAddress"]).to_string();
 
@@ -95,19 +100,21 @@ pub fn get_raw_historic_aw_device_data(api_credentials: AmbientWeatherAPICredent
     let response: Value = reqwest::blocking::get(get_aw_api_url(api_credentials, &device_mac_address.to_string()))?
         .json()?;
 
-    return Ok(json!(response))
+    Ok(json!(response))
 }
 
 /// Gets the latest device data from the Ambient Weather API.
 /// 
-/// Currently does so in a blocking manner. Asyncronus support will be added eventually.
+/// As of version 0.2.0, this function now functions asyncronously.
 /// 
 /// In order to use this API, you will need to look over the [list of device parameters](https://github.com/ambient-weather/api-docs/wiki/Device-Data-Specs) that Ambient Weather offers. Not all device parameters may be used, so make sure you are calling one that is associated with your device.
+/// 
+/// When calling the `get_latest_aw_device_data` function, you must pass the api_credentials as a reference (`&api_credentials`), as this allows for it to be called multiple times elsewhere in a program if necessary.
 /// 
 /// # Examples
 /// 
 /// ```
-/// use ambient_weather_api::get_latest_aw_device_data;
+/// use ambient_weather_api::*;
 /// 
 /// fn main() {
 ///
@@ -117,28 +124,31 @@ pub fn get_raw_historic_aw_device_data(api_credentials: AmbientWeatherAPICredent
 ///         device_id: 0,
 ///         use_new_api_endpoint: false,
 ///     };
-///
-///     let latest_data = get_latest_aw_device_data(api_credentials);
-///
-///     println!("{}", latest_data["tempf"]);
+///     
+///     // Get the current temperature
+///     let latest_data = get_latest_aw_device_data(&api_credentials);
+///     println!("The current temp is: {}F", latest_data.tempf.unwrap());
+/// 
 /// }
 /// ```
-pub fn get_latest_aw_device_data(api_credentials: AmbientWeatherAPICredentials) -> Value {
+pub fn get_latest_aw_device_data(api_credentials: &AmbientWeatherAPICredentials) -> weather_data_struct::WeatherData {
     let latest_raw_device_data = get_raw_latest_aw_device_data(api_credentials, "".to_string()).unwrap();
 
-    return json!(latest_raw_device_data["lastData"])
+    let weather_data: weather_data_struct::WeatherData = serde_json::from_value(json!(latest_raw_device_data["lastData"])).unwrap();
+
+    weather_data
 }
 
 /// Gets the historic device data from the Ambient Weather API.
 /// 
-/// Currently does so in a blocking manner. Asyncronus support will be added eventually.
+/// Currently does so in a blocking manner. Asyncronus support will hopefully be added eventually.
 /// 
 /// In order to use this API, you will need to look over the [list of device parameters](https://github.com/ambient-weather/api-docs/wiki/Device-Data-Specs) that Ambient Weather offers. Not all device parameters may be used, so make sure you are calling one that is associated with your device.
 /// 
 /// # Examples
 /// 
 /// ```
-/// use ambient_weather_api::get_historic_aw_device_data;
+/// use ambient_weather_api::*;
 /// 
 /// fn main() {
 ///
@@ -148,14 +158,23 @@ pub fn get_latest_aw_device_data(api_credentials: AmbientWeatherAPICredentials) 
 ///         device_id: 0,
 ///         use_new_api_endpoint: false,
 ///     };
-///
-///     let historic_data = get_historic_aw_device_data(api_credentials);
-///
-///     println!("{}", historic_data[0]["tempf"]);
+///     
+///     // Get the historic temperatures and loop through them going back in time
+///     let historic_data = get_historic_aw_device_data(&api_credentials);
+///        for i in 0..historic_data.len() {
+///            println!("The historic temp was: {}F", historic_data[i].tempf.unwrap());
+///        }
+///     
 /// }
 /// ```
-pub fn get_historic_aw_device_data(api_credentials: AmbientWeatherAPICredentials) -> Value {
+pub fn get_historic_aw_device_data(api_credentials: &AmbientWeatherAPICredentials) -> Vec<weather_data_struct::WeatherData> {
     let historic_raw_device_data = get_raw_historic_aw_device_data(api_credentials).unwrap();
 
-    return json!(historic_raw_device_data)
+    let data_array: Vec<Value> = historic_raw_device_data.as_array().unwrap().to_vec();
+
+    let weather_data: Vec<weather_data_struct::WeatherData> = data_array.into_iter()
+        .map(|data| serde_json::from_value(data).unwrap())
+        .collect();
+
+    weather_data
 }

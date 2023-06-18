@@ -1,11 +1,10 @@
 [package]
 name = "ambient-weather-api"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["Joshua Kimsey"]
 edition = "2021"
 description = "A library for accessing the Ambient Weather API"
 license = "MIT"
-license-file = "LICENSE"
 readme = "README.md"
 homepage = "https://github.com/JoshuaKimsey/ambient-weather-api"
 categories = ["api-bindings", ]
@@ -15,4 +14,6 @@ package = ["api", "weather"]
 
 [dependencies]
 reqwest = { version = "0.11.12", features = ["json", "blocking"] }
+serde = {version = "1.0.147", features = ["derive"] }
 serde_json = "1.0.87"
+tokio = { version = "1.21.2", features = ["full"] }
