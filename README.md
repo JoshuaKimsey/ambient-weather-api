@@ -1,4 +1,4 @@
-# Ambient Weather API
+# Ambient Weather API in Rust
 
 `ambient_weather_api` is a collection of functions for downloading current and historical data from the Ambient Weather API. It features built in support for choosing which device you want to pull data from, and has (some) safety measures built in to avoid hitting Ambient Weather's rate limits. 
 
@@ -7,6 +7,8 @@ To learn more about how the Ambient Weather API works, and to obtain the require
 In order to use this API, you will need to look over the [list of device parameters](https://github.com/ambient-weather/api-docs/wiki/Device-Data-Specs) that Ambient Weather offers. Not all device parameters may be used, so make sure you are calling one that is associated with your device.
 
 Currently, this Rust crate is only capable of utilizing the Ambient Weather REST API. Support for their Realtime Socket.IO API will come at a later date.
+
+To view more about this crate and to access the official documentation, please visit the [crates.io](https://crates.io/crates/ambient-weather-api) page.
 
 # Getting Started
 
