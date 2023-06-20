@@ -1,12 +1,13 @@
 [package]
 name = "ambient-weather-api"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Joshua Kimsey"]
 edition = "2021"
 description = "A library for accessing the Ambient Weather API"
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/JoshuaKimsey/ambient-weather-api"
+keywords = ["AmbientWeather", "Weather", "API"]
 categories = ["api-bindings", ]
 package = ["api", "weather"]
 exclude = [

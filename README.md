@@ -27,11 +27,11 @@ fn main() {
     };
     
     // Get the current temperature
-    let latest_data = get_latest_aw_device_data(&api_credentials);
+    let latest_data = get_latest_device_data(&api_credentials);
     println!("The current temp is: {}F", latest_data.tempf.unwrap());
 
     // Get the historic temperatures and loop through them going back in time
-    let historic_data = get_historic_aw_device_data(&api_credentials);
+    let historic_data = get_historic_device_data(&api_credentials);
     for i in 0..historic_data.len() {
         println!("The historic temp was: {}F", historic_data[i].tempf.unwrap());
     }
