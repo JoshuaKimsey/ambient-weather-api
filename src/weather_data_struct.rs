@@ -1,6 +1,6 @@
 use serde::{Serialize,Deserialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct WeatherData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub winddir: Option<u16>,

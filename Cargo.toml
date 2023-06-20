@@ -1,6 +1,6 @@
 [package]
 name = "ambient-weather-api"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Joshua Kimsey"]
 edition = "2021"
 description = "A library for accessing the Ambient Weather API"
